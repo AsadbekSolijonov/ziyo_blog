@@ -54,7 +54,8 @@
 # .idea/modules
 # *.iml
 # *.ipr
- .idea/*.xml
+.idea/*.xml
+
 
 # CMake
 cmake-build-*/
