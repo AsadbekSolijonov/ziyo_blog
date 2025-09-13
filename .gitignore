@@ -50,11 +50,11 @@
 # .idea/jarRepositories.xml
 # .idea/modules.xml
  .idea/*.iml
- .idea/*.xml
  .idea/vcs.xml
 # .idea/modules
 # *.iml
 # *.ipr
+ .idea/*.xml
 
 # CMake
 cmake-build-*/
