@@ -9,12 +9,12 @@ from content.serializers import BlogSerializer
 @api_view(['GET', 'POST'])
 def blogs(request):
     if request.method == 'GET':
-        blogs = Blog.objects.all()
-        serializer = BlogSerializer(blogs, many=True)
+        blogs_ = Blog.objects.all()
+        serializer = BlogSerializer(blogs_, many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = BlogSerializer(data=request.data)
+        serializer = BlogSerializer(data=request.data, context={"request": request.data})
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
         return Response(serializer.data)

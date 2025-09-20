@@ -9,3 +9,9 @@ class Blog(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+
+    def title_length(self):
+        return len(self.title.split())
+
+    def body_len(self):
+        return len(self.body.split())

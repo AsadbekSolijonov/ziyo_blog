@@ -5,10 +5,13 @@ from content.validators import is_not_con_validator
 
 class BlogSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
+    content = serializers.CharField(source='body')
+    title_len = serializers.IntegerField(source='title_length', read_only=True)
+    content_len = serializers.IntegerField(source='body_len', read_only=True)
 
     class Meta:
         model = Blog
-        fields = ['id', 'title', 'body', 'user']
+        fields = ['id', 'title', 'content', 'user', 'title_len', 'content_len']
         read_only_fields = ('id', 'user')
 
     # field-level validation
@@ -31,4 +34,5 @@ class BlogSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         from datetime import datetime
         rep['now'] = datetime.now()
+        rep['hello'] = self.context.get('request')
         return rep
