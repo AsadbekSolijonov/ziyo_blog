@@ -1,10 +1,19 @@
+from django.conf import settings
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from content.models import Blog
 from content.validators import is_not_con_validator
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'is_staff', 'is_superuser']
+
+
 class BlogSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+    user = UserSerializer(read_only=True)
+    # user = serializers.StringRelatedField()
     content = serializers.CharField(source='body')
     title_len = serializers.IntegerField(source='title_length', read_only=True)
     content_len = serializers.IntegerField(source='body_length', read_only=True)
@@ -23,8 +32,9 @@ class BlogSerializer(serializers.ModelSerializer):
 
     # object-level validation.
     def validate(self, attrs):
-        if attrs['title'].lower() == attrs['body'].lower():
-            raise serializers.ValidationError("title va body maydonlar teng bo'lishi mumkin emas.")
+        if attrs.get('title'):
+            if attrs['title'].lower() == attrs['body'].lower():
+                raise serializers.ValidationError("title va body maydonlar teng bo'lishi mumkin emas.")
         return attrs
 
     # def to_internal_value(self, data):

@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # content app
-    path('', include('content.urls')),
+    path('blog/', include('content.urls')),
 
 
 ]
