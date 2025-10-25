@@ -45,7 +45,7 @@ class BlogSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         from datetime import datetime
         rep['now'] = datetime.now()
-        rep['hello'] = self.context.get('request')
+        rep['hello'] = self.context.get('request').user.username
         return rep
 
     def get_content_title_diff(self, obj):
