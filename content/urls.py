@@ -5,5 +5,6 @@ urlpatterns = [
     path('', views.blogs),
     path('<int:pk>/', views.single_blog),
     path('cbv-lc/', views.BlogListCreateView.as_view()),
-    path('cbv-rud/<int:pk>', views.BlogRetrieveUpdateDestoryView.as_view())
+    path('cbv-rud/<int:pk>', views.BlogRetrieveUpdateDestoryView.as_view()),
+    path('my/', views.MyListBlogView.as_view())
 ]
