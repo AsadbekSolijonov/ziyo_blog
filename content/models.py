@@ -33,3 +33,22 @@ class Blog(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+
+class Comment(models.Model):
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}: ({self.blog.title[:5]}, {self.body[:5]})"
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    blogs = models.ManyToManyField(Blog, related_name='tag')
+
+    def __str__(self):
+        return f"{self.name}"
