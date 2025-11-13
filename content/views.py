@@ -1,42 +1,29 @@
-from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework import generics
-from datetime import datetime
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
 
-from content.models import Blog
-from content.permissions import IsOwnerOrSuperUser
-from content.serializers import BlogSerializer
+from content.models import Tag, Comment, Blog
+from content.serializers import TagSerializer, CommentSerializer, BlogSerializer
 
 
-class BlogListCreateView(generics.ListCreateAPIView):
-    queryset = Blog.objects.all()
-    serializer_class = BlogSerializer
-    # permission_classes = [IsAuthenticated, ]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+class TagViewSet(ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [IsAuthenticated, ]
 
 
-class MyListBlogView(generics.ListAPIView):
-    queryset = Blog.objects.all()
-    serializer_class = BlogSerializer
+class CommentViewSet(ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, ]
 
     def get_queryset(self):
-        if not self.request.user.is_superuser:
-            return Blog.objects.filter(user=self.request.user)
-        return Blog.objects.all()
+        return Comment.objects.filter(blog_id=self.kwargs['blog_pk']).select_related('user', 'blog')
+
+    def perform_create(self, serializer):
+        blog_id = self.kwargs['blog_pk']
+        serializer.save(user=self.request.user, blog_id=blog_id)
 
 
-class BlogRetrieveUpdateDestoryView(generics.RetrieveUpdateDestroyAPIView):
+class BlogViewSet(ModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
-    permission_classes = [IsOwnerOrSuperUser, ]
 
-    # def get_object(self):
-    #     obj = super().get_object()
-    #     if obj.user != self.request.user:
-    #         raise PermissionDenied
-    #     return obj

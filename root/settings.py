@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -134,3 +135,23 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+UNFOLD = {
+    "SITE_TITLE": "Ziyo Blog Kirish",
+    "SITE_HEADER": "Ziyo Blog Adminkasi",
+    "SITE_SUBHEADER": "Mening shaxsiy blogim",
+    "SITE_DROPDOWN": [
+        {
+            "icon": "diamond",
+            "title": "kun.uz",
+            "link": "https://kun.uz",
+        },
+        {
+            "icon": "rectangle",
+            "title": "Rectangle",
+            "link": "https://example.com",
+        },
+        # ...
+    ],
+    "THEME": "dark",
+}

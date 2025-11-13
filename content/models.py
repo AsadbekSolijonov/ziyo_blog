@@ -18,14 +18,6 @@ class Blog(models.Model):
     def __str__(self):
         return f"{self.title}"
 
-    @property
-    def title_length(self):
-        return len(self.title.split())
-
-    @property
-    def body_length(self):
-        return len(self.body.split())
-
     class Meta:
         ordering = ['-created_at']
 
