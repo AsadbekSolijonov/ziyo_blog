@@ -1,4 +1,6 @@
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from content.models import Tag, Comment, Blog
@@ -27,3 +29,12 @@ class BlogViewSet(ModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
 
+    # get_queryset published blogs.
+
+    @action(detail=False, methods=['GET', ], url_path='me_blogs')
+    def my_blogs(self, *args, **kwargs):
+        blogs = Blog.objects.filter(user=self.request.user)
+        serializer = BlogSerializer(blogs, many=True)
+        return Response(serializer.data)
+
+    # unpublished blogs action
