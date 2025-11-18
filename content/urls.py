@@ -8,7 +8,7 @@ router = DefaultRouter()
 router.register("blogs", BlogViewSet, basename='blog')
 router.register("tags", TagViewSet, basename='tag')
 
-blog_router = NestedSimpleRouter(router, "blogs", lookup="blog")
+blog_router = NestedSimpleRouter(router, "blogs", lookup='blog')
 blog_router.register("comments", CommentViewSet, basename='blog-comment')
 
 urlpatterns = [
