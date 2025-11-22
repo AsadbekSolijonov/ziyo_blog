@@ -1,10 +1,12 @@
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from django.db.models import F
 
+from content.filters import BlogFilter
 from content.models import Tag, Comment, Blog
 from content.serializers import TagSerializer, CommentSerializer, BlogSerializer
 
@@ -35,37 +37,54 @@ class CommentViewSet(ModelViewSet):
 class BlogViewSet(ModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = BlogFilter
+    search_fields = ('title', 'user__username')
 
     def get_queryset(self):
-        return Blog.objects.filter(is_published=True)
+        qs = Blog.objects.all()
+        if self.action == 'my_blogs':
+            qs = qs.filter(user=self.request.user)
+        elif self.action == 'unpublished':
+            qs = qs.filter(is_published=False, user=self.request.user)
+        return qs
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
-        obj.views += 1
-        obj.save(update_fields=['views'])
+        Blog.objects.filter(id=obj.id).update(views=F('views') + 1)
+        obj.refresh_from_db(fields=['views'])
         serializer = BlogSerializer(obj)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['GET', ], url_path='me_blogs')
+    @action(detail=False, methods=['get', ], url_path='me_blogs')
     def my_blogs(self, *args, **kwargs):
-        blogs = Blog.objects.filter(user=self.request.user)
+        blogs = self.get_queryset()
+        page = self.paginate_queryset(blogs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = BlogSerializer(blogs, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['GET', ], url_path="Unpublished")
+    @action(detail=False, methods=['get', ], url_path="Unpublished")
     def unpublished(self, *args, **kwargs):
-        unp_blogs = self.get_queryset().filter(is_published=False, user=self.request.user)
+        unp_blogs = self.get_queryset()
+        page = self.paginate_queryset(unp_blogs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = BlogSerializer(unp_blogs, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['POST', ], permission_classes=[IsAuthenticated, ])
+    @action(detail=True, methods=['post', ], permission_classes=[IsAuthenticated, ])
     def like(self, requst, pk=None):
         obj = self.get_object()
         obj.likes.add(self.request.user)
-        # obj.save(update_fields=['likes'])
         return Response({"detial": "Successfully is liked."})
 
-    @action(detail=True, methods=['POST', ], permission_classes=[IsAuthenticated, ])
+    @action(detail=True, methods=['post', ], permission_classes=[IsAuthenticated, ])
     def unlike(self, requst, pk=None):
         obj = self.get_object()
         obj.likes.remove(self.request.user)
